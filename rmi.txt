@@ -1,0 +1,154 @@
+//circleImplementation.java
+
+import java.rmi.*;
+import java.rmi.server.*;
+
+public class circleImplementation extends UnicastRemoteObject implements circleInterface
+{
+    public circleImplementation() throws RemoteException
+    {
+        super();                                   
+    }
+    public double area(int radius) throws RemoteException
+    {
+        double pi=3.14;
+        return pi*radius*radius;
+    }
+    public double perimeter(int radius) throws RemoteException
+    {
+        double pi=3.14;
+        return 2*pi*radius;
+    }
+}
+
+
+//circleInterface.java
+import java.rmi.*;
+public interface circleInterface extends Remote                       //We want to results remotely
+{
+ public double area(int radius) throws RemoteException;
+public double perimeter(int radius) throws RemoteException;
+}
+
+
+
+
+//Server.java
+import java.rmi.*;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.*; 
+public class server
+{
+    public server() throws RemoteException
+    {
+        super();
+    }
+    public static void main(String args[]) throws RemoteException
+    {
+        Registry reg=LocateRegistry.createRegistry(2000);
+        circleImplementation ci=new circleImplementation();
+        reg.rebind("circle",ci);
+        System.out.println("|-|-|-|-|-|-|-|-|-|-|");
+        System.out.println("Server is Waiting.....");
+    }
+}
+
+
+//Client.java
+import java.rmi.Naming;
+import java.util.Scanner;
+
+public class client
+{
+    public client()
+    {}
+        public static void main(String args[]) throws Exception
+        {
+            int radius;
+            Scanner sc=new Scanner(System.in);
+            System.out.println("|-|-|-|-|-|-|-|-|-|-|");
+            System.out.print("Enter The Radius Of The Circle : ");
+            radius=sc.nextInt();
+            circleInterface c=(circleInterface)Naming.lookup("rmi://localhost:2000/circle");
+            System.out.println("The Area of Circle is : "+c.area(radius));
+            System.out.println("The Circumference of Circle is : "+c.perimeter(radius));   
+            System.out.println("|-|-|-|-|-|-|-|-|-|-|");
+        }
+}
+
+
+
+//AddClient.java
+import java.rmi.*;
+public class AddClient {
+public static void main(String args[]) { 
+try {
+// Get reference to the remote object
+String addServerURL = "rmi://" + args[0] + "/AddServer"; 
+AddServerIntf addServerIntf =
+(AddServerIntf) Naming.lookup(addServerURL);
+System.out.println("The first number is: " + args[1]); 
+double d1 = Double.parseDouble(args[1]);
+System.out.println("The second number is: " + args[2]);
+double d2 = Double.parseDouble(args[2]);
+// Invoke remote method to add numbers
+System.out.println("The sum is: " + addServerIntf.add(d1, d2));
+} 
+catch (Exception e) { System.out.println("Exception: "+ e);
+}}}
+
+//Addserver.java
+import java.rmi.*;
+
+public class AddServer {
+public static void main(String args[]) {
+try { 
+//create remote object
+AddServerImpl addServerImpl = new AddServerImpl(); 
+//bind the remote object
+Naming.rebind("AddServer", addServerImpl);
+}
+catch (Exception e) {
+System.out.println("Exception: "+ e);
+}}}
+
+//AddServerImpl.java
+import java.rmi.*;
+import java.rmi.server.*;
+//class that implements the remote interface
+public class AddServerImpl extends UnicastRemoteObject 
+implements AddServerIntf {
+//constructor
+public AddServerImpl() throws RemoteException {
+}
+//implement method declared in the interface
+public double add(double d1, double d2) throws RemoteException {
+ return d1 + d2; }
+}
+
+//AddserverIntf.java
+import java.rmi.*;
+public interface AddServerIntf extends Remote { 
+//method declaration 
+double add(double d1, double d2) throws RemoteException;
+}
+
+
+
+//install 
+sudo apt-get remove openjdk*
+ sudo apt update
+ sudo apt install openjdk-8-jdk openjdk-8-jre
+sudo update-alternatives --config java
+
+
+//1.javac *.java
+rmic AddServerImpl
+2.rmiregistry or rmiregistry 2000 & //Ensure you're in the bin directory of project when running rmiregistry.
+3.java AddServer
+4.java AddClient 127.0.0.1 5 8
+
+
+//Go to Project → Clean → Clean all projects → OK
+Right-click Server.java → Run As → Java Application
+Right-click Client.java → Run As → Java Application
